@@ -29,12 +29,37 @@ class Property(models.Model):
     description = fields.Text(string='Description')
     feature_ids = fields.Many2many('property.feature', string='Features')
 
-
+    address = fields.Char(string="Address")
+    year_built = fields.Date(string="Year Built")
+    area_sqft = fields.Float(string="Area(sqft)")
 
     num_bedrooms = fields.Integer(string="Bedrooms", help="Only for Apartments/Villas")
     num_floors = fields.Integer(string="Floors", help="Mainly for Villas/Commercial")
     has_parking = fields.Boolean(string="Parking", help="Common for Offices/Commercial")
     license_number = fields.Char(string="Business License", help="Required for Commercial")
+
+    is_discount = fields.Boolean(string="Has Discount")
+
+    price_per_year = fields.Float(string='Price per Year', compute='_compute_price_per_year', store=True)
+    discount_percent = fields.Float(string='Discount (%)')
+    discounted_price = fields.Float(string='Discounted Price', store=True)
+
+    @api.depends('price_per_month')
+    def _compute_price_per_year(self):
+        for rec in self:
+            rec.price_per_year = rec.price_per_month * 12
+
+    @api.onchange('discount_percent', 'price_per_month')
+    def _onchange_discount(self):
+        for rec in self:
+            if rec.discount_percent < 0 or rec.discount_percent > 100:
+                return {
+                    'warning': {
+                        'title': 'Invalid Discount',
+                        'message': 'discount should be  between 0 and 100'
+                    }
+                }
+            rec.discounted_price = rec.price_per_month * (1 - rec.discount_percent / 100) if rec.price_per_month else 0
 
 
 class PropertyFeature(models.Model):
