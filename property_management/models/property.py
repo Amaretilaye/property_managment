@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 
 class Property(models.Model):
@@ -29,20 +30,26 @@ class Property(models.Model):
     description = fields.Text(string='Description')
     feature_ids = fields.Many2many('property.feature', string='Features')
 
-    address = fields.Char(string="Address")
-    year_built = fields.Date(string="Year Built")
-    area_sqft = fields.Float(string="Area(sqft)")
+    address = fields.Char(string='Address')
+    year_built = fields.Integer(string='Year Built')
+    area_sqft = fields.Float(string='Area (sqft)')
 
-    num_bedrooms = fields.Integer(string="Bedrooms", help="Only for Apartments/Villas")
+    num_bedrooms = fields.Integer(string="Bedrooms", help="Only for Apartments/Villas", required=True)
     num_floors = fields.Integer(string="Floors", help="Mainly for Villas/Commercial")
-    has_parking = fields.Boolean(string="Parking", help="Common for Offices/Commercial")
     license_number = fields.Char(string="Business License", help="Required for Commercial")
-
-    is_discount = fields.Boolean(string="Has Discount")
 
     price_per_year = fields.Float(string='Price per Year', compute='_compute_price_per_year', store=True)
     discount_percent = fields.Float(string='Discount (%)')
-    discounted_price = fields.Float(string='Discounted Price', store=True)
+    discounted_price = fields.Float(string='Discounted Price', readonly=True)
+
+    def action_maintenance(self):
+        self.status = 'maintenance'
+
+    @api.constrains('property_type', 'num_bedrooms')
+    def _validate_bedrooms(self):
+        for record in self:
+            if record.property_type in ['apartment', 'villa'] and not record.num_bedrooms:
+                raise ValidationError("Bedrooms are required for Apartments and Villas!")
 
     @api.depends('price_per_month')
     def _compute_price_per_year(self):
@@ -56,7 +63,7 @@ class Property(models.Model):
                 return {
                     'warning': {
                         'title': 'Invalid Discount',
-                        'message': 'discount should be  between 0 and 100'
+                        'message': 'Discount percent must be between 0 and 100.'
                     }
                 }
             rec.discounted_price = rec.price_per_month * (1 - rec.discount_percent / 100) if rec.price_per_month else 0

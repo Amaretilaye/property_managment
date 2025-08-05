@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lease_summary_report" model="ir.actions.report">
+        <field name="name">Lease Summary Report</field>
+        <field name="model">lease.management</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">property_management.lease_summary_template</field>
+        <field name="report_file">property_management.lease_summary_template</field>
+    </record>
+
+    <template id="lease_summary_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <h2>Lease Summary</h2>
+                    <p><strong>Tenant:</strong> <span t-field="o.tenant_id.name"/></p>
+                    <p><strong>Property:</strong> <span t-field="o.property_id.name"/></p>
+                    <p><strong>Start Date:</strong> <span t-field="o.start_date"/></p>
+                    <p><strong>End Date:</strong> <span t-field="o.end_date"/></p>
+                    <p><strong>Monthly Rent:</strong> <span t-field="o.monthly_rent" t-options='{"widget": "monetary"}'/></p>
+                    <p><strong>Status:</strong> <span t-field="o.state"/></p>
+                    <br/>
+                    <p><strong>Signature:</strong> ___________________________</p>
+                    <p><strong>Date:</strong> ___________________________</p>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

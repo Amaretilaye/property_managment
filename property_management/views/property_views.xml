@@ -17,6 +17,9 @@
                 <field name="company_id"/>
                 <field name="description"/>
                 <field name="num_bedrooms"/>
+                <field name="address"/>
+                <field name="year_built"/>
+
             </list>
         </field>
     </record>
@@ -28,7 +31,10 @@
             <form>
                 <sheet>
                     <header>
-                        <field name="status" widget="statusbar" options="{'clickable': true}"/>
+                        <button name="action_maintenance" type="object" string="Set Maintenance"
+                                groups="property_management.group_property_manager"
+                                class="oe_highlight"/>
+                        <field name="status" widget="statusbar" options="{'clickable': false}"/>
                     </header>
                     <div class="oe_title">
                         <h1>
@@ -41,53 +47,49 @@
                             <field name="currency_id" invisible="1"/>
                             <field name="price_per_month" widget="monetary"
                                    options="{'currency_field': 'currency_id'}"/>
-                            <field name="price_per_year" widget="monetary"
-                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="price_per_year" readonly="1"/>
+                            <field name="discount_percent"/>
+                            <field name="discounted_price"/>
+                            <field name="address"/>
+                            <field name="area_sqft"/>
+
+
                         </group>
                         <group string="Meda">
                             <field name="image" widget="image" class="oe_avatar"/>
+
                         </group>
 
                     </group>
-                    <group string="Additional Info">
-                        <group>
-                            <field name="is_discount"/>
-                            <field name="discount_percent" invisible="is_discount != True"/>
-                            <field name="discounted_price" invisible="is_discount != True"/>
-
-                        </group>
-                        <group>
-                            <field name="address" readonly="status in 'rented'"/>
-                            <field name="year_built" readonly="status in 'rented'"/>
-                            <field name="area_sqft" readonly="status in 'rented'"/>
-                        </group>
-
-                    </group>
-
                     <notebook>
                         <page string="Description">
 
                             <div>
                                 <label for="num_bedrooms" string="Num of Bed Rooms"
                                        invisible="property_type in ['commercial', 'office']"/>
-                                <field name="num_bedrooms" invisible="property_type in ['commercial', 'office']"/>
+                                <field name="num_bedrooms"
+                                       required="property_type in ['apartment', 'villa']"
+                                       invisible="property_type in ['commercial', 'office']"/>
                             </div>
                             <div>
-                                <label for="license_number" string=" License Number"
-                                       invisible="property_type in ['apartment','villa']"/>
-                                <field name="license_number" invisible="property_type in ['apartment', 'villa']"/>
+                                <label for="license_number" string="License Number"
+                                       invisible="property_type != 'commercial'"/>
+                                <field name="license_number" invisible="property_type != 'commercial'"/>
+                            </div>
+                            <div>
+                                <label for="year_built" string="Year Builted" readonly="status == 'rented'"/>
+                                <field name="year_built" readonly="status == 'rented'"/>
                             </div>
                             <field name="description" placeholder="Enter property description..."/>
+
                         </page>
 
 
                         <page string="Features">
                             <label for="feature_ids" string="Feature"/>
-                            <field name="feature_ids" widget="many2many_tags"/>
+                            <field name="feature_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                         </page>
-                        <page string="Test">
 
-                        </page>
                     </notebook>
                 </sheet>
                 <!--                <div class="oe_chatter">-->
@@ -111,7 +113,7 @@
                     <t t-name="kanban-box">
                         <!--templates -->
                         <!--Template Attribute Formatted-->
-                        <div t-attf-class="{{ record.status.raw_value == 'available' ? 'oe_kanban_color_0' : record.status.raw_value == 'rented' ? 'oe_kanban_color_3' : 'oe_kanban_color_2' }}">
+                        <div t-attf-class="oe_kanban_global_click {{ record.status.raw_value == 'available' ? 'oe_kanban_color_0' : record.status.raw_value == 'rented' ? 'oe_kanban_color_3' : 'oe_kanban_color_2' }}">
                             <div class="row">
                                 <div class="col-4">
                                     <field name="image" widget="image" class="oe_kanban_image"/>

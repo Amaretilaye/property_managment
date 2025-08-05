@@ -1,17 +1,25 @@
 {
     'name': "Property Management",
-    'version': '1.0',
-    'summary': 'This module provides a complete property rental management system for real estate businesses and property managers. It enables users to manage properties, register tenants, create and track lease agreements, and automate rent calculations and payments. ',
-    'depends': ['base', 'mail'],
-    'author': 'Amare Tilaye',
-    'sequence': 0,
+    'version': '18.0',
+    'summary': 'Manage properties, tenants, leases, and payments',
+    'description': """
+        A comprehensive property management system for handling properties, tenants, leases, payments, and analytics.
+    """,
+    'author': 'Amare Tilaye'
+              '',
     'category': 'Real Estate',
-    'website': 'https://example.com/learn-more-about-my-module',
-
+    'depends': ['base', 'mail'],
     'data': [
         'security/ir.model.access.csv',
+        'security/property_management_security.xml',
         'views/property_views.xml',
+        'views/tenant_views.xml',
+        'views/lease_views.xml',
+        'views/rent_payment_views.xml',
         'views/menu.xml',
+        'report/lease_report.xml',
+        'data/tenant_id.xml',
+
     ],
     'installable': True,
     'application': True,
