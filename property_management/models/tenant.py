@@ -9,4 +9,4 @@ class Tenant(models.Model):
     email = fields.Char(string='Email')
     phone = fields.Char(string='Phone')
     id_number = fields.Char(string='ID Number')
-    lease_ids = fields.One2many('lease.management', 'tenant_id', string='Leases')
+    lease_ids = fields.One2many('lease.management', 'tenant_id', string='Leases')  # one tenant can have multiple leases

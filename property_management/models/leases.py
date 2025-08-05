@@ -1,10 +1,9 @@
-from odoo import  fields, models, api
+from odoo import fields, models, api
 
 
 class Lease(models.Model):
     _name = 'lease.management'
     _description = 'Lease Management'
-
 
     name = fields.Char(string='Lease Name', store=True)
     tenant_id = fields.Many2one('tenant.management', string='Tenant', required=True)
@@ -17,3 +16,5 @@ class Lease(models.Model):
         ('active', 'Active'),
         ('expired', 'Expired')
     ], string='Status', default='draft')
+    payment_ids = fields.One2many('rent.payment', 'lease_id', string='Payments')  #lease should have malty payment
+    note = fields.Text(string='Note')
