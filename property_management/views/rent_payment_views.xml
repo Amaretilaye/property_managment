@@ -18,13 +18,16 @@
         <field name="model">rent.payment</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_payment" type="object" string="Pay" class="btn-primary"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
                 <sheet>
                     <group>
                         <field name="name"/>
                         <field name="lease_id"/>
                         <field name="payment_date"/>
                         <field name="amount_paid" widget="monetary"/>
-                        <field name="status"/>
                         <field name="note"/>
                     </group>
                 </sheet>

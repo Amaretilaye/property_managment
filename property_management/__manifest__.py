@@ -19,6 +19,9 @@
         'views/menu.xml',
         'report/lease_report.xml',
         'data/tenant_id.xml',
+        'data/payment_sq.xml',
+        'data/cron.xml',
+        'data/email.xml',
 
     ],
     'installable': True,
