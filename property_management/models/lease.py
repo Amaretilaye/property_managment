@@ -24,6 +24,23 @@ class Lease(models.Model):
     payment_ids = fields.One2many('rent.payment', 'lease_id', string='Payments')
     company_id = fields.Many2one('res.company', string="Company", default=lambda self: self.env.company)
 
+    total_days = fields.Float(string="Total Days", compute="_compute_total_rent", store=True)
+    total_months = fields.Float(string="Total Months", compute="_compute_total_rent", store=True)
+    total_rent = fields.Float(string="Total Rent", compute="_compute_total_rent", store=True)
+
+    @api.depends('start_date', 'end_date', 'monthly_rent')
+    def _compute_total_rent(self):
+
+        for rec in self:
+            if rec.start_date and rec.end_date:
+                rec.total_days = (rec.end_date - rec.start_date).days + 1  # Include the start date in the total days
+                rec.total_months = rec.total_days / 30
+                rec.total_rent = rec.total_months * rec.monthly_rent
+            else:
+                rec.total_days = 0
+                rec.total_months = 0
+                rec.total_rent = 0
+
     @api.depends('tenant_id', 'property_id')
     def _compute_lease_name(self):
         for lease in self:
@@ -54,32 +71,13 @@ class Lease(models.Model):
                 ('state', 'in', ['draft', 'active']),
                 '|',
                 '&', ('start_date', '>=', record.start_date), ('start_date', '<=', record.end_date),
+                # The start date of the other lease is within the current lease's date range.
                 '&', ('end_date', '>=', record.start_date), ('end_date', '<=', record.end_date)
+                # The end date of the other lease is within the current lease's date range.
+
             ])
             if overlapping_leases:
                 raise ValidationError('This property is already leased for the selected period.')
-
-    @api.model
-    def _send_expiry_notification(self, lease, recipient_emails):
-        """Send expiration notification to legal team members"""
-        template = self.env.ref('property_management.email_lease_expire', raise_if_not_found=False)
-
-        try:
-            for email in recipient_emails:
-                template.with_context(
-                    lease_name=lease.name,
-                    end_date=lease.end_date,
-                    tenant_name=lease.tenant_id.name
-                ).send_mail(
-                    lease.id,
-                    force_send=True,
-                    email_values={'email_to': email}
-                )
-            _logger.info(f"Sent expiration notice for lease {lease.name} to {recipient_emails}")
-            return True
-        except Exception as e:
-            _logger.error(f"Failed to send expiration notice for lease {lease.name}: {str(e)}")
-            return False
 
     @api.model
     def check_lease_expiry(self):
@@ -103,3 +101,25 @@ class Lease(models.Model):
             if lease.end_date <= fields.Date.today():
                 lease.action_expired()
             self._send_expiry_notification(lease, manager_emails)
+
+    @api.model
+    def _send_expiry_notification(self, lease, recipient_emails):
+        """Send expiration notification to legal team members"""
+        template = self.env.ref('property_management.email_lease_expire', raise_if_not_found=False)
+
+        try:
+            for email in recipient_emails:
+                template.with_context(
+                    lease_name=lease.name,
+                    end_date=lease.end_date,
+                    tenant_name=lease.tenant_id.name
+                ).send_mail(
+                    lease.id,
+                    force_send=True,
+                    email_values={'email_to': email}
+                )
+            _logger.info(f"Sent expiration notice for lease {lease.name} to {recipient_emails}")
+            return True
+        except Exception as e:
+            _logger.error(f"Failed to send expiration notice for lease {lease.name}: {str(e)}")
+            return False

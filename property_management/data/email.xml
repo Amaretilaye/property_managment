@@ -27,6 +27,10 @@
                             <strong t-esc="object.name"/>
                             is expiring soon.
                         </p>
+                        <p>The end date is
+                            <strong t-esc="object.end_date"/>
+
+                        </p>
                         <p>Please take the necessary actions before the expiration date.</p>
                         <p>Best regards,</p>
                         <p t-esc="object.company_id.name"/>

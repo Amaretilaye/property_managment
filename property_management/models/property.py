@@ -40,7 +40,22 @@ class Property(models.Model):
 
     price_per_year = fields.Float(string='Price per Year', compute='_compute_price_per_year', store=True)
     discount_percent = fields.Float(string='Discount (%)')
-    discounted_price = fields.Float(string='Discounted Price', readonly=True)
+    discounted_price = fields.Float(string='Discounted Price')
+
+    def action_available(self):
+        self.ensure_one()  # Ensures this method works on single records
+        self.status = 'available'
+
+        # Create corresponding product
+        product = self.env['product.product'].create({
+            'name': self.name,
+            'list_price': self.price_per_month,
+            'type': 'service',
+            'default_code': f'PROP-{self.id}',  # Adding unique identifier
+            'property_management_id': self.id,
+        })
+
+        return True
 
     def action_maintenance(self):
         self.status = 'maintenance'
