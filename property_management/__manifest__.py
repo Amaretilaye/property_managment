@@ -19,8 +19,10 @@
         'views/menu.xml',
         'views/property_crm_views.xml',
         'views/property_sale_views.xml',
-
+        # 'views/rent_payment_excel_views.xml',
         'report/lease_summary_template.xml',
+
+        'wizard/rent_payment_excel_wizard.xml',
         'wizard/lease_summarty_wizard_view.xml',
 
         'data/tenant_id.xml',

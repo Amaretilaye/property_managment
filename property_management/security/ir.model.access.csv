@@ -5,3 +5,4 @@ access_tenant_management,access.tenant.management,model_tenant_management,base.g
 access_rent_payment,access.rent.payment,model_rent_payment,base.group_user,1,1,1,1
 access_property_feature,access.property.feature,model_property_feature,base.group_user,1,1,1,1
 access_lease_summary_wizard,access.lease.summary.wizard,model_lease_summary_wizard,base.group_user,1,1,1,1
+access_rent_payment_report_wizard,access.rent.payment.report.wizard,model_rent_payment_report_wizard,base.group_user,1,1,1,1
