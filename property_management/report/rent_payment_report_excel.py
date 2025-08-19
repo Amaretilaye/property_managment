@@ -5,6 +5,7 @@ import base64
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
 
+
 class RentPaymentReportWizard(models.TransientModel):
     _name = 'rent.payment.report.wizard'
     _description = 'Rent Payment Report Wizard'
@@ -36,66 +37,67 @@ class RentPaymentReportWizard(models.TransientModel):
         wb = Workbook()
         ws = wb.active
         ws.title = "Rent Payment Report"
-
+        #
         # Define styles
         header_font = Font(bold=True)
         border = Border(left=Side(style='thin'), right=Side(style='thin'),
                         top=Side(style='thin'), bottom=Side(style='thin'))
         align_center = Alignment(horizontal='center', vertical='center')
-
-        # Write headers
+        #
+        # # Write headers
         headers = ['Payment Reference', 'Lease', 'Payment Date', 'Amount Paid', 'Status', 'Note']
-        for col, header in enumerate(headers, start=1):
-            cell = ws.cell(row=1, column=col)
+        for col, header in enumerate(headers, start=2):
+            cell = ws.cell(row=2, column=col)
             cell.value = header
             cell.font = header_font
             cell.alignment = align_center
             cell.border = border
-
-        # Write data
+        #
+        # # Write data
         for row, payment in enumerate(payments, start=2):
             ws.cell(row=row, column=1, value=payment.name).border = border
             ws.cell(row=row, column=2, value=payment.lease_id.name).border = border
             ws.cell(row=row, column=3, value=payment.payment_date.strftime('%Y-%m-%d')).border = border
             ws.cell(row=row, column=4, value=payment.amount_paid).border = border
-            ws.cell(row=row, column=5, value=payment.status.title()).border = border
+            ws.cell(row=row, column=5,
+                    value=dict(payment._fields['status'].selection).get(payment.status)).border = border
             ws.cell(row=row, column=6, value=payment.note or '').border = border
 
-        # Adjust column widths
-        for col in ws.columns:
-            max_length = 0
-            column = col[0].column_letter
-            for cell in col:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = max_length + 2
-            ws.column_dimensions[column].width = adjusted_width
+            # Adjust column widths
+            for col in ws.columns:
+                max_length = 0
+                column = col[0].column_letter
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = max_length + 2
+                ws.column_dimensions[column].width = adjusted_width
 
-        # Save the workbook to a binary stream
-        output = io.BytesIO()
-        wb.save(output)
-        output.seek(0)
+            # Save the workbook to a binary stream
+            output = io.BytesIO()
+            wb.save(output)
+            output.seek(0)
 
-        # Encode the file in base64
-        excel_data = base64.b64encode(output.read())
-        output.close()
+            # Encode the file in base64
+            excel_data = base64.b64encode(output.read())
+            output.close()
 
-        # Create attachment
-        attachment = self.env['ir.attachment'].create({
-            'name': 'Rent_Payment_Report.xlsx',
-            'type': 'binary',
-            'datas': excel_data,
-            'res_model': self._name,
-            'res_id': self.id,
-            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        })
+            # Create attachment
+            attachment = self.env['ir.attachment'].create({
+                'name': 'Rent_Payment_Report.xlsx',
+                'type': 'binary',
+                'datas': excel_data,
+                'res_model': self._name,
+                'res_id': self.id,
+                'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            })
 
-        # Return action to download the file
-        return {
-            'type': 'ir.actions.act_url',
-            'url': f'/web/content/{attachment.id}?download=true',
-            'target': 'self',
-        }
+            # Return action to download the file
+            return {
+                'type': 'ir.actions.act_url',
+                'url': f'/web/content/{attachment.id}?download=true',
+                'target': 'self',
+            }
