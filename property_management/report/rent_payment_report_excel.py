@@ -46,8 +46,8 @@ class RentPaymentReportWizard(models.TransientModel):
         #
         # # Write headers
         headers = ['Payment Reference', 'Lease', 'Payment Date', 'Amount Paid', 'Status', 'Note']
-        for col, header in enumerate(headers, start=2):
-            cell = ws.cell(row=2, column=col)
+        for col, header in enumerate(headers, start=1):
+            cell = ws.cell(row=1, column=col)
             cell.value = header
             cell.font = header_font
             cell.alignment = align_center
